@@ -2,6 +2,9 @@ class FacebookCopyGenerator {
     constructor() {
         this.init();
         this.bindEvents();
+        this.selectedPainPoint = null;
+        this.lastGenerateTime = 0;
+        this.cooldownTime = 60000; // 60 seconds in milliseconds
     }
 
     init() {
@@ -51,6 +54,11 @@ class FacebookCopyGenerator {
         document.getElementById('modelSelect').addEventListener('change', (e) => {
             this.selectedModel = e.target.value;
             localStorage.setItem('selectedModel', this.selectedModel);
+        });
+
+        // Add pain points suggestion button
+        document.getElementById('suggestPainPoints').addEventListener('click', () => {
+            this.generatePainPointsSuggestions();
         });
     }
 
@@ -134,17 +142,24 @@ class FacebookCopyGenerator {
             Fokus pada titik kesakitan ini: "${painPoint}"
             
             Penting:
-            1. Gunakan emoji yang berkaitan (2-3 emoji sahaja)
+            1. Gunakan emoji yang berkaitan (3-4 emoji sahaja)
             2. Tulis dalam bentuk perbualan yang santai dan mesra
             3. Pastikan format penulisan seperti di Facebook (ada baris kosong antara perenggan)
             4. Jangan terlalu formal
-            5. Tambah call-to-action yang menarik di akhir
-            6. Maksimum 500 patah perkataan`;
+            5. Masukkan:
+               - Pengenalan yang menarik perhatian
+               - Huraian masalah dengan lebih mendalam
+               - Bukti dan testimoni
+               - Penyelesaian yang terperinci
+               - Tawaran atau promosi eksklusif
+               - Call-to-action yang menarik di akhir
+            6. Maksimum 1000 patah perkataan
+            7. Tambah hashtag yang berkaitan (3-5 hashtag)
+            8. Sertakan nombor WhatsApp atau pautan di akhir`;
 
         try {
-            // Create AbortController for timeout
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
+            const timeout = setTimeout(() => controller.abort(), 60000); // Increased timeout to 60 seconds
 
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
@@ -160,7 +175,8 @@ class FacebookCopyGenerator {
                     messages: [{
                         role: 'user',
                         content: prompt
-                    }]
+                    }],
+                    max_tokens: 2000 // Increased token limit for longer responses
                 })
             });
 
@@ -180,6 +196,9 @@ class FacebookCopyGenerator {
             let content = data.choices[0].message.content;
             content = content.replace(/\n/g, '\n\n'); // Double spacing between paragraphs
             content = content.replace(/\n\n\n+/g, '\n\n'); // Remove excessive spacing
+            
+            // Ensure hashtags are on their own line
+            content = content.replace(/(#[^\s]+)(?=\s*#)/g, '$1\n');
 
             return content;
         } catch (error) {
@@ -193,6 +212,15 @@ class FacebookCopyGenerator {
     }
 
     async generateContent() {
+        const now = Date.now();
+        const timeElapsed = now - this.lastGenerateTime;
+        
+        if (timeElapsed < this.cooldownTime) {
+            const remainingTime = Math.ceil((this.cooldownTime - timeElapsed) / 1000);
+            alert(`Sila tunggu ${remainingTime} saat sebelum menjana salinan baru.`);
+            return;
+        }
+
         if (!this.apiKey) {
             alert('Sila masukkan kunci API terlebih dahulu.');
             return;
@@ -204,33 +232,22 @@ class FacebookCopyGenerator {
             return;
         }
 
+        if (!this.selectedPainPoint) {
+            alert('Sila pilih titik kesakitan terlebih dahulu.');
+            return;
+        }
+
         const progressBar = document.querySelector('.progress-bar');
         progressBar.style.display = 'block';
         const progress = document.querySelector('.progress');
         progress.style.width = '0%';
 
         try {
-            // Generate pain points
-            progress.style.width = '30%';
-            const painPoints = await this.generatePainPoints(productDetails);
-            
-            if (!painPoints || painPoints.length === 0) {
-                throw new Error('Tiada titik kesakitan yang dijana');
-            }
-
-            // Display pain points for selection
-            const painPointsSection = document.querySelector('.pain-points');
-            painPointsSection.style.display = 'block';
-            this.displayPainPoints(painPoints);
-
-            progress.style.width = '60%';
-
-            // Wait for pain point selection
-            const selectedPainPoint = await this.waitForPainPointSelection();
+            progress.style.width = '50%';
             
             // Generate copy with selected framework and pain point
             const framework = document.getElementById('frameworkSelect').value;
-            const copy = await this.generateCopy(productDetails, framework, selectedPainPoint);
+            const copy = await this.generateCopy(productDetails, framework, this.selectedPainPoint);
 
             if (!copy) {
                 throw new Error('Tiada salinan yang dijana');
@@ -245,11 +262,37 @@ class FacebookCopyGenerator {
                 progress.style.width = '0%';
             }, 1000);
 
+            // Update last generate time
+            this.lastGenerateTime = Date.now();
+            this.startCooldownTimer();
+
         } catch (error) {
             console.error('Error:', error);
             alert(`Ralat semasa menjana kandungan: ${error.message}`);
             progressBar.style.display = 'none';
         }
+    }
+
+    startCooldownTimer() {
+        const generateBtn = document.getElementById('generateBtn');
+        generateBtn.disabled = true;
+        
+        let remainingTime = this.cooldownTime / 1000;
+        
+        const updateButton = () => {
+            generateBtn.textContent = `Tunggu ${remainingTime}s`;
+            remainingTime--;
+            
+            if (remainingTime < 0) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Jana Salinan Iklan';
+                return;
+            }
+            
+            setTimeout(updateButton, 1000);
+        };
+        
+        updateButton();
     }
 
     displayPainPoints(painPoints) {
@@ -264,21 +307,52 @@ class FacebookCopyGenerator {
             item.addEventListener('click', () => {
                 Array.from(items).forEach(i => i.classList.remove('selected'));
                 item.classList.add('selected');
+                this.selectedPainPoint = item.textContent;
             });
         });
     }
 
-    waitForPainPointSelection() {
-        return new Promise((resolve) => {
-            const painPointsList = document.getElementById('painPointsList');
-            const checkSelection = setInterval(() => {
-                const selected = painPointsList.querySelector('.selected');
-                if (selected) {
-                    clearInterval(checkSelection);
-                    resolve(selected.textContent);
-                }
-            }, 100);
-        });
+    async generatePainPointsSuggestions() {
+        const productDetails = document.getElementById('productDetails').value;
+        if (!productDetails) {
+            alert('Sila masukkan butiran produk/perkhidmatan terlebih dahulu.');
+            return;
+        }
+
+        if (!this.apiKey) {
+            alert('Sila masukkan kunci API terlebih dahulu.');
+            return;
+        }
+
+        const progressBar = document.querySelector('.progress-bar');
+        progressBar.style.display = 'block';
+        const progress = document.querySelector('.progress');
+        progress.style.width = '0%';
+
+        try {
+            progress.style.width = '50%';
+            const painPoints = await this.generatePainPoints(productDetails);
+            
+            if (!painPoints || painPoints.length === 0) {
+                throw new Error('Tiada titik kesakitan yang dijana');
+            }
+
+            // Display pain points for selection
+            const painPointsSection = document.querySelector('.pain-points');
+            painPointsSection.style.display = 'block';
+            this.displayPainPoints(painPoints);
+            
+            progress.style.width = '100%';
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+                progress.style.width = '0%';
+            }, 1000);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Ralat semasa menjana titik kesakitan: ${error.message}`);
+            progressBar.style.display = 'none';
+        }
     }
 
     displayGeneratedCopy(copy) {

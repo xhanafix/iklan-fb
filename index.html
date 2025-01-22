@@ -43,6 +43,14 @@
                 <textarea id="productDetails" placeholder="Sila masukkan butiran produk atau perkhidmatan anda..."></textarea>
             </div>
 
+            <div class="pain-points-generator">
+                <button id="suggestPainPoints" class="secondary-btn">Jana Cadangan Titik Kesakitan</button>
+                <div class="pain-points" style="display: none;">
+                    <h2>Pilih Titik Kesakitan</h2>
+                    <div id="painPointsList"></div>
+                </div>
+            </div>
+
             <div class="framework-selection">
                 <h2>Pilih Rangka Kerja Salinan</h2>
                 <select id="frameworkSelect">
@@ -57,11 +65,6 @@
                     <option value="PPPP">PPPP (Picture, Promise, Prove, Push)</option>
                     <option value="ACC">ACC (Attention, Clarity, Conviction)</option>
                 </select>
-            </div>
-
-            <div class="pain-points" style="display: none;">
-                <h2>Pilih Titik Kesakitan</h2>
-                <div id="painPointsList"></div>
             </div>
 
             <button id="generateBtn" class="generate-btn">Jana Salinan Iklan</button>
