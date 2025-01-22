@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penjana Salinan Iklan Facebook</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="light-theme">
+    <div class="container">
+        <header>
+            <h1>Penjana Salinan Iklan Facebook</h1>
+            <div class="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fas fa-moon"></i>
+            </div>
+        </header>
+
+        <section class="api-setup">
+            <h2>Tetapan API</h2>
+            <div class="api-input">
+                <input type="password" id="apiKey" placeholder="Masukkan kunci API OpenRouter">
+                <button id="saveApiKey">Simpan Kunci API</button>
+            </div>
+        </section>
+
+        <section class="content-generator">
+            <div class="product-input">
+                <h2>Butiran Produk/Perkhidmatan</h2>
+                <textarea id="productDetails" placeholder="Sila masukkan butiran produk atau perkhidmatan anda..."></textarea>
+            </div>
+
+            <div class="framework-selection">
+                <h2>Pilih Rangka Kerja Salinan</h2>
+                <select id="frameworkSelect">
+                    <option value="AIDA">AIDA (Attention, Interest, Desire, Action)</option>
+                    <option value="PAS">PAS (Problem, Agitate, Solve)</option>
+                    <option value="PESTA">PESTA (Pain, Empathy, Solution, Testimony, Action)</option>
+                    <option value="FAB">FAB (Features, Advantages, Benefits)</option>
+                    <option value="4U">4U (Urgent, Unique, Ultra-Specific, Useful)</option>
+                    <option value="BAB">BAB (Before, After, Bridge)</option>
+                    <option value="STAR">STAR (Situation, Task, Action, Result)</option>
+                    <option value="SLAP">SLAP (Stop, Look, Act, Purchase)</option>
+                    <option value="PPPP">PPPP (Picture, Promise, Prove, Push)</option>
+                    <option value="ACC">ACC (Attention, Clarity, Conviction)</option>
+                </select>
+            </div>
+
+            <div class="pain-points" style="display: none;">
+                <h2>Pilih Titik Kesakitan</h2>
+                <div id="painPointsList"></div>
+            </div>
+
+            <button id="generateBtn" class="generate-btn">Jana Salinan Iklan</button>
+
+            <div class="progress-bar" style="display: none;">
+                <div class="progress"></div>
+            </div>
+        </section>
+
+        <section class="preview-section" style="display: none;">
+            <h2>Pratonton Iklan Facebook</h2>
+            <div class="fb-post-preview">
+                <div class="post-header">
+                    <div class="profile-pic"></div>
+                    <div class="post-info">
+                        <div class="page-name">Nama Halaman Anda</div>
+                        <div class="post-time">Sekarang</div>
+                    </div>
+                </div>
+                <div class="post-content" contenteditable="true"></div>
+                <div class="post-actions">
+                    <button id="copyBtn"><i class="fas fa-copy"></i> Salin</button>
+                    <button id="downloadBtn"><i class="fas fa-download"></i> Muat Turun</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2025 <a href="https://www.hanafihassan.com" target="_blank">www.hanafihassan.com</a></p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
