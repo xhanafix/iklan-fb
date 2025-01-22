@@ -247,4 +247,18 @@ button:hover {
 .footer a:hover {
     color: var(--secondary-color);
     text-decoration: underline;
+}
+
+.model-selection {
+    margin-bottom: 20px;
+}
+
+.model-selection select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: 10px;
 } 

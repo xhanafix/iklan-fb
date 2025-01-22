@@ -15,6 +15,10 @@ class FacebookCopyGenerator {
         if (this.apiKey) {
             document.getElementById('apiKey').value = this.apiKey;
         }
+
+        // Load saved model preference if exists
+        this.selectedModel = localStorage.getItem('selectedModel') || 'google/learnlm-1.5-pro-experimental:free';
+        document.getElementById('modelSelect').value = this.selectedModel;
     }
 
     bindEvents() {
@@ -41,6 +45,12 @@ class FacebookCopyGenerator {
         // Download button
         document.getElementById('downloadBtn').addEventListener('click', () => {
             this.downloadContent();
+        });
+
+        // Add model selection event
+        document.getElementById('modelSelect').addEventListener('change', (e) => {
+            this.selectedModel = e.target.value;
+            localStorage.setItem('selectedModel', this.selectedModel);
         });
     }
 
@@ -80,7 +90,7 @@ class FacebookCopyGenerator {
                 },
                 signal: controller.signal,
                 body: JSON.stringify({
-                    model: 'google/learnlm-1.5-pro-experimental:free',
+                    model: this.selectedModel,
                     messages: [{
                         role: 'user',
                         content: prompt
@@ -146,7 +156,7 @@ class FacebookCopyGenerator {
                 },
                 signal: controller.signal,
                 body: JSON.stringify({
-                    model: 'google/learnlm-1.5-pro-experimental:free',
+                    model: this.selectedModel,
                     messages: [{
                         role: 'user',
                         content: prompt
